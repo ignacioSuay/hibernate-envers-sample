@@ -23,17 +23,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import sample.data.jpa.SampleDataJpaApplication;
 import sample.data.jpa.config.Transactor;
 import sample.data.jpa.domain.City;
@@ -126,9 +117,15 @@ public class CityRepositoryIntegrationTests {
 		AuditReader reader = AuditReaderFactory.get(entityManager);
 		AuditQuery query = reader.createQuery()
 				.forRevisionsOfEntity(City.class, false, false);
+
+		//This return a list of array triplets of changes concerning the specified revision.
+		// The array triplet contains the entity, entity revision information and at last the revision type.
 		Object[] obj = (Object[]) query.getSingleResult();
 
-		String user = ((UserRevEntity) obj[1]).getUsername();
+		//In this case we want the entity revision information object, which is the second object of the array.
+		UserRevEntity userRevEntity = (UserRevEntity) obj[1];
+
+		String user = userRevEntity.getUsername();
 		assertThat(user, is(UserRevisionListener.USERNAME));
 
 	}
